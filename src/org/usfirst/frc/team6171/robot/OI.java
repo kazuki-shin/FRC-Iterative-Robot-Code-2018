@@ -19,23 +19,23 @@ public class OI {
 	public OI(){
 		
 		drive = new Joystick(1);
-		dA = new JoystickButton(drive, 1);
+		dA = new JoystickButton(drive, 1);//swtiches drive mode
 		dB = new JoystickButton(drive, 2);
 		dX = new JoystickButton(drive, 3);
 		dY = new JoystickButton(drive, 4);
-		dLB = new JoystickButton(drive, 5);
-		dRB = new JoystickButton(drive, 6);
+		dLB = new JoystickButton(drive, 5);//LB and RB trigger slow mode
+		dRB = new JoystickButton(drive, 6);//
 		dBack = new JoystickButton(drive, 7);
 		dStart = new JoystickButton(drive, 8);
 		dLeftJoy = new JoystickButton(drive, 9);
 		dRightJoy = new JoystickButton(drive, 10);
 		
 		manipulator = new Joystick(2);
-		mA = new JoystickButton(manipulator, 1);
-		mB = new JoystickButton(manipulator, 2);
-		mX = new JoystickButton(manipulator, 3);
-		mY = new JoystickButton(manipulator, 4);
-		mLB = new JoystickButton(manipulator, 5);
+		mA = new JoystickButton(manipulator, 1);//stops flywheels
+		mB = new JoystickButton(manipulator, 2);//fly wheels shooting
+		mX = new JoystickButton(manipulator, 3);//fly wheels Intake
+		mY = new JoystickButton(manipulator, 4);//piston in/out
+		mLB = new JoystickButton(manipulator, 5);//allows control of winch
 		mRB = new JoystickButton(manipulator, 6);
 		mBack = new JoystickButton(manipulator, 7);
 		mStart = new JoystickButton(manipulator, 8);
