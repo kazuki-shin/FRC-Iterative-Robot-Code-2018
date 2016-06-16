@@ -12,6 +12,21 @@ public class OI {
 	public static final int RIGHTX = 4;
 	public static final int RIGHTY = 5;
 
+	public static final int A_NUM = 1;
+	public static final int B_NUM = 2;
+	public static final int X_NUM = 3;
+	public static final int Y_NUM = 4;
+	public static final int LB_NUM = 5;
+	public static final int RB_NUM = 6;
+	public static final int BACK_NUM = 7;
+	public static final int START_NUM = 8;
+	public static final int LEFT_JOY_NUM = 9;
+	public static final int RIGHT_JOY_NUM = 10;
+	
+	public static final float RUMBLE_ON = 1;
+	public static final float RUMBLE_OFF = 0;
+	
+	
 	JoystickButton dX, dA, dB, dY, dLB, dRB, dBack, dStart, dLeftJoy, dRightJoy,
 				   mX, mA, mB, mY, mLB, mRB, mBack, mStart, mLeftJoy, mRightJoy;
 	Joystick drive, manipulator;
@@ -19,28 +34,28 @@ public class OI {
 	public OI(){
 		
 		drive = new Joystick(1);
-		dA = new JoystickButton(drive, 1);//swtiches drive mode
-		dB = new JoystickButton(drive, 2);
-		dX = new JoystickButton(drive, 3);
-		dY = new JoystickButton(drive, 4);
-		dLB = new JoystickButton(drive, 5);//LB and RB trigger slow mode
-		dRB = new JoystickButton(drive, 6);//
-		dBack = new JoystickButton(drive, 7);
-		dStart = new JoystickButton(drive, 8);
-		dLeftJoy = new JoystickButton(drive, 9);
-		dRightJoy = new JoystickButton(drive, 10);
+		dA = new JoystickButton(drive, A_NUM);//swtiches drive mode
+		dB = new JoystickButton(drive, B_NUM);
+		dX = new JoystickButton(drive, X_NUM);
+		dY = new JoystickButton(drive, Y_NUM);
+		dLB = new JoystickButton(drive, LB_NUM);//LB and RB trigger slow mode
+		dRB = new JoystickButton(drive, RB_NUM);//
+		dBack = new JoystickButton(drive, BACK_NUM);
+		dStart = new JoystickButton(drive, START_NUM);
+		dLeftJoy = new JoystickButton(drive, LEFT_JOY_NUM);
+		dRightJoy = new JoystickButton(drive, RIGHT_JOY_NUM);
 		
 		manipulator = new Joystick(2);
-		mA = new JoystickButton(manipulator, 1);//stops flywheels
-		mB = new JoystickButton(manipulator, 2);//fly wheels shooting
-		mX = new JoystickButton(manipulator, 3);//fly wheels Intake
-		mY = new JoystickButton(manipulator, 4);//piston in/out
-		mLB = new JoystickButton(manipulator, 5);//allows control of winch
-		mRB = new JoystickButton(manipulator, 6);
-		mBack = new JoystickButton(manipulator, 7);
-		mStart = new JoystickButton(manipulator, 8);
-		mLeftJoy = new JoystickButton(manipulator, 9);
-		mRightJoy = new JoystickButton(manipulator, 10);
+		mA = new JoystickButton(manipulator, A_NUM);//stops flywheels
+		mB = new JoystickButton(manipulator, B_NUM);//fly wheels shooting
+		mX = new JoystickButton(manipulator, X_NUM);//fly wheels Intake
+		mY = new JoystickButton(manipulator, Y_NUM);//piston in/out
+		mLB = new JoystickButton(manipulator, LB_NUM);//allows control of winch
+		mRB = new JoystickButton(manipulator, RB_NUM);
+		mBack = new JoystickButton(manipulator, BACK_NUM);
+		mStart = new JoystickButton(manipulator, START_NUM);
+		mLeftJoy = new JoystickButton(manipulator, LEFT_JOY_NUM);
+		mRightJoy = new JoystickButton(manipulator, RIGHT_JOY_NUM);
 	
 	}
 	
@@ -82,17 +97,19 @@ public class OI {
 	public double getManipulatorPOV(){
 		return manipulator.getPOV();
 	}
+	
+	
 	public void setManipulatorVibrate(boolean status)
 	{
 		if(status)
 		{
-			manipulator.setRumble(RumbleType.kLeftRumble,1);
-			manipulator.setRumble(RumbleType.kRightRumble,1);
+			manipulator.setRumble(RumbleType.kLeftRumble,RUMBLE_ON);
+			manipulator.setRumble(RumbleType.kRightRumble,RUMBLE_ON);
 		}
 		else
 		{
-			manipulator.setRumble(RumbleType.kLeftRumble,0);
-			manipulator.setRumble(RumbleType.kRightRumble,0);
+			manipulator.setRumble(RumbleType.kLeftRumble,RUMBLE_OFF);
+			manipulator.setRumble(RumbleType.kRightRumble,RUMBLE_OFF);
 		}
 			
 	}
@@ -100,13 +117,13 @@ public class OI {
 	{
 		if(status)
 		{
-			drive.setRumble(RumbleType.kLeftRumble,1);
-			drive.setRumble(RumbleType.kRightRumble,1);
+			drive.setRumble(RumbleType.kLeftRumble,RUMBLE_ON);
+			drive.setRumble(RumbleType.kRightRumble,RUMBLE_ON);
 		}
 		else
 		{
-			drive.setRumble(RumbleType.kLeftRumble,0);
-			drive.setRumble(RumbleType.kRightRumble,0);
+			drive.setRumble(RumbleType.kLeftRumble,RUMBLE_OFF);
+			drive.setRumble(RumbleType.kRightRumble,RUMBLE_OFF);
 		}	
 	}
 }
