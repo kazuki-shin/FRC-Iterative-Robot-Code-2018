@@ -5,6 +5,7 @@ import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
@@ -30,6 +31,8 @@ public class Robot extends IterativeRobot {
 	public Winch winch;
 	public AHRS ahrs;
 	
+	public PowerDistributionPanel pdp;
+	
 	public static double sensitivity,slowMode;
 	public boolean isShooting, isIntaking, pistonOut, mYPushed, isArcade, dAPushed;
 	public int rumbleCount;
@@ -46,6 +49,7 @@ public class Robot extends IterativeRobot {
 		drive =  new DriveTrain();
     	shooter = new Shooter();
     	winch = new Winch();
+    	pdp = new PowerDistributionPanel();
 		SmartMaker.startCamera("cam1");
     	try {
 	          ahrs = new AHRS(SPI.Port.kMXP); 
