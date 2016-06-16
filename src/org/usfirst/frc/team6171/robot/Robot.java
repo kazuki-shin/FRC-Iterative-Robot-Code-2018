@@ -52,6 +52,7 @@ public class Robot extends IterativeRobot {
 	      } catch (RuntimeException ex ) {
 	          DriverStation.reportError("Error instantiating navX MXP:  " + ex.getMessage(), true);
 	      }
+    	
     }
     
 	/**

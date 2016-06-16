@@ -24,5 +24,12 @@ public class DriveTrain extends RobotDrive{
     	}
         
 	}
-	
+	public boolean turn(double angle)
+	{
+		return true;
+	}
+	public boolean drive(double distance)
+	{
+		return true;
+	}
 }
