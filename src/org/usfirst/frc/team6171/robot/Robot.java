@@ -1,6 +1,8 @@
 
 package org.usfirst.frc.team6171.robot;
 
+import java.util.ArrayList;
+
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -37,6 +39,8 @@ public class Robot extends IterativeRobot {
 	public boolean isShooting, isIntaking, pistonOut, mYPushed, isArcade, dAPushed;
 	public int rumbleCount;
 	
+	ArrayList<ArrayList<Double>> memory;
+	
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -56,7 +60,7 @@ public class Robot extends IterativeRobot {
 	      } catch (RuntimeException ex ) {
 	          DriverStation.reportError("Error instantiating navX MXP:  " + ex.getMessage(), true);
 	      }
-    	
+    	memory = new ArrayList<ArrayList<Double>>();
     }
     
 	/**
@@ -68,15 +72,22 @@ public class Robot extends IterativeRobot {
 	 * You can add additional auto modes by adding additional comparisons to the switch structure below with additional strings.
 	 * If using the SendableChooser make sure to add them to the chooser code above as well.
 	 */
+    int counter;
     public void autonomousInit() {
-
+    	counter = 0;
     }
 
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-    	
+    	drive.setMaxOutput(.2);
+    	if(counter<memory.size())
+    	{
+    		ArrayList<Double> temp = memory.get(counter);
+    		drive.arcadeDrive(temp.get(1), temp.get(2));
+    		counter++;
+    	}
     }
 
     public void teleopInit(){
@@ -106,12 +117,21 @@ public class Robot extends IterativeRobot {
     				 System.out.println("No drive speed selected");
     				 
     	}
+    	
+    	memory = new ArrayList<ArrayList<Double>>();
     }
     
     /**
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
+    	
+    	ArrayList<Double> vals = new ArrayList<Double>();
+    	vals.add(oi.getDriveLeftX());
+    	vals.add(oi.getDriveLeftY());
+    	vals.add(oi.getDriveRightX());
+    	vals.add(oi.getDriveRightY());
+    	memory.add(vals);
     	
     	shooter.checkRPM();
     	if(oi.dA.get()){
