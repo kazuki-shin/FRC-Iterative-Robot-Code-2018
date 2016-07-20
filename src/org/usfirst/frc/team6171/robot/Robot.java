@@ -24,23 +24,18 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
  * directory.
  */
 public class Robot extends IterativeRobot {
-	//git update
 	public VictorSP leftFront, leftRear, rightFront, rightRear;
-	//public RobotDrive drive;
 	public OI oi;
 	public DriveTrain drive;
 	public Shooter shooter;
 	public Winch winch;
 	public AHRS ahrs;
-	
+	public NetworkTable network;
 	public PowerDistributionPanel pdp;
 	
-	public static double sensitivity,slowMode;
+	public static double sensitivity,slowMode, yVal, calculatedAngle;
 	public boolean isShooting, isIntaking, pistonOut, mYPushed, isArcade, dAPushed;
 	public int rumbleCount;
-	
-	ArrayList<ArrayList<Double>> memory;
-	
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -60,7 +55,7 @@ public class Robot extends IterativeRobot {
 	      } catch (RuntimeException ex ) {
 	          DriverStation.reportError("Error instantiating navX MXP:  " + ex.getMessage(), true);
 	      }
-    	memory = new ArrayList<ArrayList<Double>>();
+    	network = NetworkTable.getTable("SmartDashboard");
     }
     
 	/**
@@ -72,22 +67,15 @@ public class Robot extends IterativeRobot {
 	 * You can add additional auto modes by adding additional comparisons to the switch structure below with additional strings.
 	 * If using the SendableChooser make sure to add them to the chooser code above as well.
 	 */
-    int counter;
     public void autonomousInit() {
-    	counter = 0;
+    	
     }
 
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-    	drive.setMaxOutput(.2);
-    	if(counter<memory.size())
-    	{
-    		ArrayList<Double> temp = memory.get(counter);
-    		drive.arcadeDrive(temp.get(1), temp.get(2));
-    		counter++;
-    	}
+    	
     }
 
     public void teleopInit(){
@@ -118,7 +106,6 @@ public class Robot extends IterativeRobot {
     				 
     	}
     	
-    	memory = new ArrayList<ArrayList<Double>>();
     }
     
     /**
@@ -126,13 +113,22 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
     	
-    	ArrayList<Double> vals = new ArrayList<Double>();
-    	vals.add(oi.getDriveLeftX());
-    	vals.add(oi.getDriveLeftY());
-    	vals.add(oi.getDriveRightX());
-    	vals.add(oi.getDriveRightY());
-    	memory.add(vals);
-    	
+    	try{
+    		double[] points = network.getNumberArray("BFR_COORDINATES");
+    		yVal = (points[1]+points[3]+points[5]+points[7])/4;
+//    		calculatedAngle = .1544349*yVal +  20.1191;
+//    		if(yVal<135)
+//    		{
+//    			calculatedAngle = 41;
+//    		}
+    		//calculatedAngle = .1182129115*yVal +  24.26737922189;
+    		calculatedAngle = .1000664615*yVal +  25.31444167075;
+    		
+    	}
+    	catch(Exception e){
+    		//System.out.println("No camera data");
+    	}
+    	System.out.println(calculatedAngle);
     	shooter.checkRPM();
     	if(oi.dA.get()){
     		dAPushed = true;
@@ -256,7 +252,7 @@ public class Robot extends IterativeRobot {
     		case "No Speed": sensitivity = 0;
     		default: sensitivity = 0; 
     				 System.out.println("No drive speed selected");
-    	}    	
+    	}
  }
     
     /**
