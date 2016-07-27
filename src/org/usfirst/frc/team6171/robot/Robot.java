@@ -24,14 +24,16 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
  * directory.
  */
 public class Robot extends IterativeRobot {
-	public VictorSP leftFront, leftRear, rightFront, rightRear;
 	public OI oi;
 	public DriveTrain drive;
 	public Shooter shooter;
 	public Winch winch;
-	public AHRS ahrs;
+	public static AHRS ahrs;
 	public NetworkTable network;
 	public PowerDistributionPanel pdp;
+	public Timer time;
+	public int step;
+	public boolean distDone;
 	
 	public static double sensitivity,slowMode, yVal, calculatedAngle;
 	public boolean isShooting, isIntaking, pistonOut, mYPushed, isArcade, dAPushed;
@@ -56,6 +58,9 @@ public class Robot extends IterativeRobot {
 	          DriverStation.reportError("Error instantiating navX MXP:  " + ex.getMessage(), true);
 	      }
     	network = NetworkTable.getTable("SmartDashboard");
+    	
+    	time = new Timer();
+    	step = 0;
     }
     
 	/**
@@ -68,19 +73,112 @@ public class Robot extends IterativeRobot {
 	 * If using the SendableChooser make sure to add them to the chooser code above as well.
 	 */
     public void autonomousInit() {
-    	
+    	winch.enable();
+    	winch.setAngle(25);
+    	time.reset();
+    	time.start();
+    	drive.resetEncoders();
+    	drive.setDistanceSetpoint(-140);
+    	drive.setOutputRange(-.7, .7);
+    	drive.pidEnable();
+    	Robot.ahrs.reset();
+    	step = 1;
+    	distDone = false;
     }
 
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-    	
+    	winch.controlWinch(-ahrs.getRoll());
+    	if(step==1){
+			System.out.println("Step 1 "+drive.leftEnc.getDistance());
+			drive.driveDistanceForwards();
+			if(Math.abs(drive.leftEnc.getDistance())>140)
+			{
+				if(time.get()>6)
+					distDone = true;
+				if(distDone){
+					ahrs.reset();
+					drive.setAngleSetpoint(17);
+					step++;
+					drive.pidDisable();
+					drive.setTurnDone(false);
+				}
+				
+			}
+		}
+    	if(step==2){
+			System.out.println("Step 2");
+			drive.turnToAngle();
+			//System.out.println(ahrs.getYaw());
+			//System.out.println(driveTrain.pid.isEnabled());
+			if(drive.getTurnDone())
+			{
+				step++;
+				drive.resetEncoders();
+				ahrs.reset();
+				drive.setDistanceSetpoint(-10);
+				drive.pidEnable();
+				
+			}
+		}
+		
+		if(step==3)
+		{
+			System.out.println("Step 3"); 
+			drive.driveDistanceForwards();
+			if(Math.abs(drive.leftEnc.getDistance())>10)
+			{
+				ahrs.reset();
+				drive.setAngleSetpoint(-132);
+				step++;
+				drive.pidDisable();
+				drive.setTurnDone(false);
+			}
+		}
+		if(step==4){
+			System.out.println(drive.pid.isEnabled());
+			System.out.println(ahrs.getYaw());
+			System.out.println("Step 4");
+			drive.turnToAngle();
+			if(drive.getTurnDone())
+			{
+				step++;
+				ahrs.reset();
+				drive.resetEncoders();
+				drive.setDistanceSetpoint(25);
+				drive.pidEnable();
+				//winch.setAngle(35);
+			}
+		}
+		if(step ==5){
+			drive.driveDistanceForwards();
+			if(Math.abs(drive.leftEnc.getDistance())>20){
+				step++;
+				winch.setAngle(50);
+			}
+		}
+		if(step == 6){
+			shooter.spinUp();
+			if(time.get()>14){
+				shooter.shoot();
+				step++;
+			}
+		}
+		if(step == 7){
+			if(time.get()>16){
+				shooter.stop();
+				shooter.retract();
+			}
+			
+		}
     }
 
     public void teleopInit(){
     	
     	//winch
+    	drive.pidDisable();
     	winch.setAngle(-ahrs.getRoll());
     	winch.enable();
     	shooter.checkRPM();
@@ -246,7 +344,7 @@ public class Robot extends IterativeRobot {
     	//selects the drive speed
     	String driveSpeedSelected = (String )SmartMaker.driveSpeed.getSelected();
     	switch(driveSpeedSelected){
-    		case "Comp Speed": sensitivity = 0.7; break;
+    		case "Comp Speed": sensitivity = 0.9; break;
     		case "Kid Speed": sensitivity = .4; break;
     		case "Max Speed": sensitivity = 1; break;
     		case "No Speed": sensitivity = 0;

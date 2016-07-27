@@ -16,7 +16,7 @@ public class Shooter {
     boolean out;
 	
     //set speeds of intake and shooting
-	final static int SHOOT_DESIRED_RPM_COMP = 3000;
+	final static int SHOOT_DESIRED_RPM_COMP = 4200;
     final static int INTAKE_DESIRED_RPM_COMP = 2500;
     final static int SHOOT_DESIRED_RPM_KID = 2000;
     final static int INTAKE_DESIRED_RPM_KID = 1500;
