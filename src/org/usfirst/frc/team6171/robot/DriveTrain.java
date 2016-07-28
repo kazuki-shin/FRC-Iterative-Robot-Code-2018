@@ -19,9 +19,9 @@ public class DriveTrain extends RobotDrive{
     public Encoder leftEnc;
     private boolean turnDone;
 	
-	public static final double Kp = .2;
-    public static final double Ki = .002;
-    public static final double Kd = .02;
+	public static final double Kp = .4;
+    public static final double Ki = .006;
+    public static final double Kd = .05;
 	
 	public DriveTrain(){
 		super(new VictorSP(0), new VictorSP(1), new VictorSP(2), new VictorSP(3));
@@ -42,7 +42,7 @@ public class DriveTrain extends RobotDrive{
         
         String driveSpeedSelected = (String )SmartMaker.driveSpeed.getSelected();
     	switch(driveSpeedSelected){
-    		case "Comp Speed": Robot.sensitivity = 0.7; break;
+    		case "Comp Speed": Robot.sensitivity = 0.9; break;
     		case "Kid Speed": Robot.sensitivity = .4; break;
     		case "Max Speed": Robot.sensitivity = 1; break;
     		case "No Speed": Robot.sensitivity = 0; 

@@ -10,11 +10,16 @@ public class Intake {
 		intake = new VictorSP(4);
 	}
 	
-	public void On(){
+	public void forward(){
+		intake.set(-1);
+	}
+	
+	public void backward()
+	{
 		intake.set(1);
 	}
 	
-	public void Off(){
+	public void off(){
 		intake.set(0);
 	}
 }

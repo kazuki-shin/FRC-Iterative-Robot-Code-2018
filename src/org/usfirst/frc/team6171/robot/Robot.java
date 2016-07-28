@@ -32,12 +32,17 @@ public class Robot extends IterativeRobot {
 	public NetworkTable network;
 	public PowerDistributionPanel pdp;
 	public Timer time;
-	public int step;
+	public int step,autoDistance;
 	public boolean distDone;
-	
+	public Intake intake;
 	public static double sensitivity,slowMode, yVal, calculatedAngle;
-	public boolean isShooting, isIntaking, pistonOut, mYPushed, isArcade, dAPushed;
+	public boolean isShooting, isIntaking, pistonOut, mYPushed, isArcade, dBPushed, dXPushed, dYPushed,dAPushed;
 	public int rumbleCount;
+	public boolean turningDone;
+	
+	
+	final int BIG_OBSTACLE_DISTANCE = 175;
+	final int ROUGH_TERRAIN_DISTANCE = 125;
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -46,6 +51,8 @@ public class Robot extends IterativeRobot {
     public void robotInit() {
     	SmartMaker.driveSpeedChooser();
 		SmartMaker.RPMSpeedChooser();
+		SmartMaker.AutonSelectorChooser();
+		intake = new Intake();
     	oi = new OI();
 		drive =  new DriveTrain();
     	shooter = new Shooter();
@@ -61,6 +68,7 @@ public class Robot extends IterativeRobot {
     	
     	time = new Timer();
     	step = 0;
+    	turningDone = false;
     }
     
 	/**
@@ -72,18 +80,50 @@ public class Robot extends IterativeRobot {
 	 * You can add additional auto modes by adding additional comparisons to the switch structure below with additional strings.
 	 * If using the SendableChooser make sure to add them to the chooser code above as well.
 	 */
+    public String choice;
     public void autonomousInit() {
     	winch.enable();
     	winch.setAngle(25);
     	time.reset();
     	time.start();
     	drive.resetEncoders();
-    	drive.setDistanceSetpoint(-140);
+    	drive.setDistanceSetpoint(-175);
     	drive.setOutputRange(-.7, .7);
     	drive.pidEnable();
     	Robot.ahrs.reset();
     	step = 1;
     	distDone = false;
+    	turningDone = false;
+    	choice = (String)SmartMaker.AutonSelector.getSelected();
+    	switch(choice){
+		case "Moat":
+		case "RockWall":
+			//winch.setAngle(15);
+			drive.setDistanceSetpoint(BIG_OBSTACLE_DISTANCE);
+			autoDistance = BIG_OBSTACLE_DISTANCE;
+			drive.setOutputRange(-.9,.9);
+			drive.pidEnable();
+			shooter.shoot();
+			break;
+		case "RoughTerrain":
+			//winch.setAngle(15);
+			drive.setDistanceSetpoint(ROUGH_TERRAIN_DISTANCE);
+			autoDistance = ROUGH_TERRAIN_DISTANCE;
+			drive.setOutputRange(-.8,.8);
+			drive.pidEnable();
+			break;
+		case "ramparts":
+			//winch.setAngle(15);
+			drive.setDistanceSetpoint(-BIG_OBSTACLE_DISTANCE);
+			autoDistance = -BIG_OBSTACLE_DISTANCE;
+			drive.setOutputRange(-.9,.9);
+			drive.pidEnable();
+			break;
+		default:break;	
+		}
+    	
+    	
+    	
     }
 
     /**
@@ -91,12 +131,15 @@ public class Robot extends IterativeRobot {
      */
     public void autonomousPeriodic() {
     	winch.controlWinch(-ahrs.getRoll());
+    	switch((String)SmartMaker.AutonSelector.getSelected())
+    	{
+    	case "LowBar":
     	if(step==1){
 			System.out.println("Step 1 "+drive.leftEnc.getDistance());
 			drive.driveDistanceForwards();
-			if(Math.abs(drive.leftEnc.getDistance())>140)
+			if(Math.abs(drive.leftEnc.getDistance())>175)
 			{
-				if(time.get()>6)
+				if(time.get()>5)
 					distDone = true;
 				if(distDone){
 					ahrs.reset();
@@ -115,12 +158,16 @@ public class Robot extends IterativeRobot {
 			//System.out.println(driveTrain.pid.isEnabled());
 			if(drive.getTurnDone())
 			{
-				step++;
-				drive.resetEncoders();
-				ahrs.reset();
-				drive.setDistanceSetpoint(-10);
-				drive.pidEnable();
-				
+				//if(time.get()>8)
+					//turningDone = true;
+				//if(turningDone){
+					step++;
+					drive.resetEncoders();
+					ahrs.reset();
+					drive.setDistanceSetpoint(-10);
+					drive.pidEnable();
+					turningDone = false;
+				//}
 			}
 		}
 		
@@ -131,7 +178,7 @@ public class Robot extends IterativeRobot {
 			if(Math.abs(drive.leftEnc.getDistance())>10)
 			{
 				ahrs.reset();
-				drive.setAngleSetpoint(-132);
+				drive.setAngleSetpoint(-100);
 				step++;
 				drive.pidDisable();
 				drive.setTurnDone(false);
@@ -147,16 +194,16 @@ public class Robot extends IterativeRobot {
 				step++;
 				ahrs.reset();
 				drive.resetEncoders();
-				drive.setDistanceSetpoint(25);
+				drive.setDistanceSetpoint(35);
 				drive.pidEnable();
 				//winch.setAngle(35);
 			}
 		}
 		if(step ==5){
 			drive.driveDistanceForwards();
-			if(Math.abs(drive.leftEnc.getDistance())>20){
+			if(Math.abs(drive.leftEnc.getDistance())>35){
 				step++;
-				winch.setAngle(50);
+				winch.setAngle(45);
 			}
 		}
 		if(step == 6){
@@ -173,6 +220,30 @@ public class Robot extends IterativeRobot {
 			}
 			
 		}
+    	break;
+    	
+    	default:
+    		winch.controlWinch(-ahrs.getRoll());
+    		if(step==1){
+    			System.out.println("Step 1");
+    			drive.driveDistanceForwards();
+    			if(Math.abs(drive.leftEnc.getDistance())>Math.abs(autoDistance))
+    			{
+    				if(((String)SmartMaker.AutonSelector.getSelected()).equals("Ramparts"))
+    					drive.setAngleSetpoint(-140);
+    				else
+    					drive.setAngleSetpoint(30);
+    				ahrs.reset();
+    				step++;
+    				drive.pidDisable();
+    				drive.setTurnDone(false);
+    			}
+    		}
+    		break;
+    	}
+    	
+    	
+    	
     }
 
     public void teleopInit(){
@@ -190,7 +261,7 @@ public class Robot extends IterativeRobot {
     	sensitivity = 1;
     	slowMode = 1;
     	isArcade = true;
-    	dAPushed = false;
+    	dAPushed = dBPushed = dAPushed = dYPushed = false;
     	rumbleCount = 0;
     	//selects the drive speed
     	String driveSpeedSelected = (String )SmartMaker.driveSpeed.getSelected();
@@ -228,18 +299,55 @@ public class Robot extends IterativeRobot {
     	}
     	System.out.println(calculatedAngle);
     	shooter.checkRPM();
+    	if(oi.dB.get()){
+    		dBPushed = true;
+    	}
+    	
+    	if(dBPushed && !oi.dB.get())
+    	{
+    		isArcade = !isArcade;
+    		dBPushed = false;
+    		if(isArcade)rumbleCount = 10;
+    		else rumbleCount = 50;
+    		oi.setDriveVibrate(true);
+    	}	
+    	
+    	
     	if(oi.dA.get()){
     		dAPushed = true;
     	}
     	
     	if(dAPushed && !oi.dA.get())
     	{
-    		isArcade = !isArcade;
     		dAPushed = false;
-    		if(isArcade)rumbleCount = 10;
-    		else rumbleCount = 50;
-    		oi.setDriveVibrate(true);
+    		intake.backward();
     	}	
+    	
+    	
+    	if(oi.dY.get()){
+    		dYPushed = true;
+    	}
+    	
+    	if(dYPushed && !oi.dY.get())
+    	{
+    		intake.forward();
+    		dYPushed = false;
+    	}	
+    	
+    	if(oi.dX.get()){
+    		dXPushed = true;
+    	}
+    	
+    	if(dXPushed && !oi.dX.get())
+    	{
+    		dXPushed = false;
+    		intake.off();
+    	}	
+    	
+    	
+    	
+    	
+    	
     	
     	if(oi.dLB.get() && oi.dRB.get())
 		{
@@ -314,10 +422,12 @@ public class Robot extends IterativeRobot {
     	else if(isIntaking)
     	{
     		shooter.intakeSpin();
+    		intake.backward();
     	}
     	else
     	{
     		shooter.stop();
+    		intake.off();
     		//winch.enable();
     		winch.setWinchTolerance(.7);
     	}
